@@ -362,7 +362,7 @@ class Infoblox(object):
     # ---------------------------------------------------------------------------
     # reserve_next_available_ip()
     # ---------------------------------------------------------------------------
-    def reserve_next_available_ip(self, network, mac_addr="00:00:00:00:00:00",
+    def reserve_next_available_ip(self, network, mac_addr=None,
                                   comment=None, extattrs=None):
         """
         Reserve ip address via fixedaddress in infoblox by using rest api
@@ -1368,7 +1368,7 @@ class Infoblox(object):
     # ---------------------------------------------------------------------------
     # create_network()
     # ---------------------------------------------------------------------------
-    def create_network(self, network, comment=None, ttl=None, extattrs=None):
+    def create_network(self, network, net_view, comment=None, extattrs=None):
         """
         Creates an PTR record with the given name that points to the given IP address.
         For documentation on how to use the related part of the InfoBlox WAPI, refer to:
@@ -1383,11 +1383,13 @@ class Infoblox(object):
         if len(self.get_network(network)) > 0:
             self.module.exit_json(msg="Network already exists.")
 
-        model = {_NETWORK_CONTAINER_PROPERTY: network, _NETWORK_PROPERTY: network,
+        model = {_NETWORK_CONTAINER_PROPERTY: network, 
+                 _NETWORK_PROPERTY: network,
+                 _NETWORK_VIEW_PROPERTY: net_view,
                  _COMMENT_PROPERTY: comment,
                  _EXT_ATTR_PROPERTY: extattrs}
-        if(ttl is not None):
-            model.update({_USE_TTL_PROPERTY: True, _TTL_PROPERTY: int(ttl)})
+        # if(ttl is not None):
+        #     model.update({_USE_TTL_PROPERTY: True, _TTL_PROPERTY: int(ttl)})
 
         model = self._make_model(model)
         return self.invoke("post", "network", ok_codes=(200, 201, 400), json=model)
@@ -2127,7 +2129,7 @@ def main():
         else:
             raise Exception()
     elif action == "create_network":
-        result = infoblox.create_network(network, comment, ttl, extattrs)
+        result = infoblox.create_network(network, net_view, comment, extattrs)
         if result:
             module.exit_json(changed=True, result=result)
         else:
