@@ -258,6 +258,9 @@ class Infoblox(object):
             - 192.168.1.0
             - 192.168.1.0/24
         """
+        # start here, to replicate get_net to container, as the view is broken in the container
+        # 
+
         if not network and not filters:
             self.module.fail_json(
                 msg="You must specify the option 'network' or 'filters'.")
@@ -1400,6 +1403,7 @@ class Infoblox(object):
     def get_network_container(self, network):
         """
         Search for IPAM network in infoblox by network
+        
         """
         if network is None:
             self.module.fail_json(msg="You must specify the option 'network'.")
@@ -1407,6 +1411,7 @@ class Infoblox(object):
                          _NETWORK_VIEW_PROPERTY, _NETWORK_PROPERTY]
         my_property = self._return_property(False, property_list)
         params = {_NETWORK_PROPERTY: network,
+                  _NETWORK_VIEW_PROPERTY: self.net_view,
                   _RETURN_FIELDS_PROPERTY: my_property}
         return self.invoke("get", "networkcontainer", params=params)
 
